@@ -1,0 +1,67 @@
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Environment & Security (PENTING!) ---
+.env
+.env.development
+.env.test
+.env.production
+.env.local
+# Kecuali example biar tim tau butuh variabel apa
+!.env.example
+
+# --- Virtual Environments (Poetry & Venv) ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Testing & Coverage (Pytest) ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# --- Type Checking & Linting ---
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+
+# --- Distribution / Build Artifacts ---
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# --- Database (Local SQLite) ---
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Logs ---
+*.log
+logs/
+
+# --- IDE / Editor Settings ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+
+#project structure
+tree.txt
+
+# poetry lock
+poetry.lock
+
+# md
+PROJECT_PLAN_RULES.md
