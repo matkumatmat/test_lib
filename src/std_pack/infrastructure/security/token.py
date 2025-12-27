@@ -16,11 +16,13 @@ class TokenHelper:
     def create_access_token(
         self, 
         subject: str | Any, 
-        expires_delta: timedelta | None = None
+        expires_delta: timedelta | None = None,
+        **extra_claims: Any
     ) -> str:
         """
         Membuat JWT Access Token.
         :param subject: Identitas utama (misal: User ID atau Email).
+        :param extra_claims: Additional claims like roles, emails, permissions.
         """
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
@@ -35,6 +37,10 @@ class TokenHelper:
             "iat": datetime.now(timezone.utc)
         }
         
+        # Add extra claims (e.g. email, role)
+        if extra_claims:
+            to_encode.update(extra_claims)
+
         encoded_jwt = jwt.encode(
             to_encode, 
             self.secret_key, 

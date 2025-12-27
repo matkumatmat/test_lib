@@ -3,10 +3,10 @@
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+from sqlmodel.ext.asyncio.session import AsyncSession
 from std_pack.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)

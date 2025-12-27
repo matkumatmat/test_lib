@@ -1,8 +1,9 @@
 # src/std_pack/infrastructure/persistence/repositories.py
-from __future__ import annotations  # <--- TAMBAHKAN INI DI BARIS 1
+from __future__ import annotations
 from typing import Any, Type, TypeVar, Generic
-from sqlalchemy import select, func, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, delete
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 from std_pack.domain.entities import BaseEntity
 from std_pack.domain.ports import IRepository
 
@@ -57,16 +58,16 @@ class SqlAlchemyRepository(IRepository[T], Generic[T, M]):
     async def get(self, id: Any) -> T | None:
         """Get by ID."""
         stmt = select(self.db_model_cls).where(self.db_model_cls.id == id)
-        result = await self.session.execute(stmt)
-        db_obj = result.scalar_one_or_none()
+        result = await self.session.exec(stmt)
+        db_obj = result.first()
         return self._to_domain(db_obj)
 
     async def delete(self, id: Any) -> bool:
         """Delete by ID. Mengembalikan True jika data ditemukan & dihapus."""
         # 1. Cari dulu object-nya
         stmt = select(self.db_model_cls).where(self.db_model_cls.id == id)
-        result = await self.session.execute(stmt)
-        db_obj = result.scalar_one_or_none()
+        result = await self.session.exec(stmt)
+        db_obj = result.first()
 
         if db_obj:
             # 2. Hapus object
@@ -87,18 +88,18 @@ class SqlAlchemyRepository(IRepository[T], Generic[T, M]):
         
         # TODO: Implement dynamic filtering logic here
         
-        result = await self.session.execute(stmt)
-        # scalars().all() mengambil semua object hasil query
-        db_objs = result.scalars().all()
+        result = await self.session.exec(stmt)
+        # .all() mengambil semua object hasil query
+        db_objs = result.all()
         
         return [self._to_domain(obj) for obj in db_objs]
 
     async def count(self, filters: dict | None = None) -> int:
         """Menghitung total data."""
         stmt = select(func.count()).select_from(self.db_model_cls)
-        result = await self.session.execute(stmt)
-        # scalar_one() untuk mengambil satu nilai int
-        return result.scalar_one()
+        result = await self.session.exec(stmt)
+        # .one() untuk mengambil satu nilai int
+        return result.one()
 
     async def save_all(self, entities: list[T]) -> list[T]:
         """
