@@ -6,7 +6,7 @@ Menggunakan pydantic-settings.
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import Field, AnyHttpUrl
+from pydantic import Field, AnyHttpUrl, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,6 +49,14 @@ class BaseAppSettings(BaseSettings):
     # Security
     SECRET_KEY: str = Field(default="unsafe-secret-key-change-me")
     
+    @model_validator(mode="after")
+    def check_safety(self) -> "BaseAppSettings":
+        """Mencegah penggunaan default secret key di Production."""
+        if self.ENVIRONMENT == EnvironmentType.PRODUCTION:
+            if self.SECRET_KEY == "unsafe-secret-key-change-me":
+                raise ValueError("CRITICAL: Do not use default SECRET_KEY in PRODUCTION!")
+        return self
+
     # CORS (List of origins)
     # Default: Allow All (*) untuk kemudahan dev lokal
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] | list[str] = Field(default=["*"])

@@ -50,9 +50,9 @@ class UserRepository(SqlAlchemyRepository[User, UserModel]):
 
     async def get_by_email(self, email: str) -> User | None:
         statement = select(UserModel).where(UserModel.email == email)
-        # FIX: Using .execute() instead of .exec() because the session is a standard SQLAlchemy AsyncSession
-        result = await self.session.execute(statement)
-        instance = result.scalars().first()
+        # FIX: Back to .exec() because we now use SQLModel AsyncSession correctly
+        result = await self.session.exec(statement)
+        instance = result.first()
         if instance:
             return self._to_domain(instance)
         return None
@@ -132,10 +132,11 @@ async def test_full_application_flow(real_db_manager):
 
         # Generate Token using Real TokenHelper
         token_helper = TokenHelper(settings)
-        # Note: Current implementation does NOT support extra_claims like email/role.
-        # This is a finding for the review report.
+
         access_token = token_helper.create_access_token(
-            subject=str(fetched_user.id)
+            subject=str(fetched_user.id),
+            email=fetched_user.email,
+            role="admin"
         )
 
         assert access_token is not None
@@ -143,7 +144,8 @@ async def test_full_application_flow(real_db_manager):
         # Decode Token
         payload = token_helper.decode_token(access_token)
         assert payload["sub"] == str(fetched_user.id)
-        # assert payload["email"] == "tester@example.com" # Can't test this yet due to library limitation
+        assert payload["email"] == "tester@example.com"
+        assert payload["role"] == "admin"
 
     # -- OPERATION 3: Update User --
     uow_update = SqlAlchemyUnitOfWork(real_db_manager.session_factory)
